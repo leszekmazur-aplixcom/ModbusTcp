@@ -421,6 +421,58 @@ namespace ModbusTcp
         }
 
         /// <summary>
+        /// Writes multiple coils
+        /// </summary>
+        /// <param name="offset">The first register offset</param>
+        /// <param name="coilQuantity">How many coils to write</param>
+        /// <param name="values">The values to write</param>
+        /// <returns>Awaitable task</returns>
+        public async Task WriteCoilsAsync(int offset, short coilQuantity, byte[] values, byte unit = 0x01)
+        {
+            if (tcpClient == null)
+                throw new Exception("Object not intialized");
+
+            var request = new ModbusRequest15(offset, coilQuantity, values, unit);
+            var buffer = request.ToNetworkBuffer();
+
+            using (var cancellationTokenSource = new CancellationTokenSource(socketTimeout))
+            {
+                using (cancellationTokenSource.Token.Register(() => transportStream.Close()))
+                {
+                    await transportStream.WriteAsync(buffer, 0, buffer.Length, cancellationTokenSource.Token);
+                }
+            }
+
+            await ReadResponseAsync<ModbusReply15>();
+        }
+
+        /// <summary>
+        /// Writes multiple coils
+        /// </summary>
+        /// <param name="offset">The first register offset</param>
+        /// <param name="coilQuantity">How many coils to write</param>
+        /// <param name="values">The values to write</param>
+        /// <returns>Awaitable task</returns>
+        public void WriteCoils(int offset, short coilQuantity, byte[] values, byte unit = 0x01)
+        {
+            if (tcpClient == null)
+                throw new Exception("Object not intialized");
+
+            var request = new ModbusRequest15(offset, coilQuantity, values, unit);
+            var buffer = request.ToNetworkBuffer();
+
+            using (var cancellationTokenSource = new CancellationTokenSource(socketTimeout))
+            {
+                using (cancellationTokenSource.Token.Register(() => transportStream.Close()))
+                {
+                    transportStream.Write(buffer, 0, buffer.Length);
+                }
+            }
+
+            ReadResponse<ModbusReply15>();
+        }
+
+        /// <summary>
         /// Writes bit to coil
         /// </summary>
         /// <param name="offset">The first register offset</param>
