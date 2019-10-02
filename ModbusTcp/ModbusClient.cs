@@ -242,6 +242,7 @@ namespace ModbusTcp
                     transportStream.Write(buffer, 0, buffer.Length);
                 }
             }
+
             var response = ReadResponse<ModbusReply01>();
             return response.Data;
         }
@@ -483,7 +484,7 @@ namespace ModbusTcp
             if (tcpClient == null)
                 throw new Exception("Object not intialized");
 
-            var request = new ModbusRequest05(unit, value, unit);
+            var request = new ModbusRequest05(offset, value, unit);
 
             var buffer = request.ToNetworkBuffer();
 
@@ -509,7 +510,7 @@ namespace ModbusTcp
             if (tcpClient == null)
                 throw new Exception("Object not intialized");
 
-            var request = new ModbusRequest05(unit, value, unit);
+            var request = new ModbusRequest05(offset, value, unit);
 
             var buffer = request.ToNetworkBuffer();
 
@@ -623,11 +624,10 @@ namespace ModbusTcp
             var headerBytes = await ReadFromBufferAsync(ModbusHeader.FixedLength);
             var header = ModbusHeader.FromNetworkBuffer(headerBytes);
 
-            var dataBytes = await ReadFromBufferAsync(header.Length);
-
-            var fullBuffer = headerBytes.Concat(dataBytes).ToArray();
+            var dataBytes = await ReadFromBufferAsync(header.Length - 1); //Ommit Unit Identifier from MBAP Header
+            
             var response = Activator.CreateInstance<T>();
-            response.FromNetworkBuffer(fullBuffer);
+            response.FromNetworkBuffer(header, dataBytes);
 
             return response;
         }
@@ -637,11 +637,10 @@ namespace ModbusTcp
             var headerBytes = ReadFromBuffer(ModbusHeader.FixedLength);
             var header = ModbusHeader.FromNetworkBuffer(headerBytes);
 
-            var dataBytes = ReadFromBuffer(header.Length);
-
-            var fullBuffer = headerBytes.Concat(dataBytes).ToArray();
+            var dataBytes = ReadFromBuffer(header.Length - 1); //Ommit Unit Identifier from MBAP Header
+            
             var response = Activator.CreateInstance<T>();
-            response.FromNetworkBuffer(fullBuffer);
+            response.FromNetworkBuffer(header, dataBytes);
 
             return response;
         }
@@ -684,12 +683,9 @@ namespace ModbusTcp
             {
                 int readBytes = 0;
                 using (var cancellationTokenSource = new CancellationTokenSource(socketTimeout))
-                {
-                    using (cancellationTokenSource.Token.Register(() => transportStream.Close()))
-                    {
-                        readBytes = transportStream.Read(buffer, idx, remainder);
-                    }
-                }
+                using (cancellationTokenSource.Token.Register(() => transportStream.Close()))
+                    readBytes = transportStream.Read(buffer, idx, remainder);
+
                 remainder -= readBytes;
                 idx += readBytes;
 

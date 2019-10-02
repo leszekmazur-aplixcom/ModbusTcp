@@ -8,14 +8,15 @@ namespace ModbusTcp.Protocol.Reply
 
         public byte[] Data;
 
-        public override void FromNetworkBuffer(byte[] buffer)
+        public override void FromNetworkBuffer(ModbusHeader header, byte[] modbusResponse)
         {
-            var idx = StandardResponseFromNetworkBuffer(buffer);
+            StandardResponseFromNetworkBuffer(header, modbusResponse);
 
-            Length = buffer[idx++];
+            Length = modbusResponse[1];
+            int len = Length;
 
-            Data = new byte[Length];
-            Buffer.BlockCopy(buffer, idx, Data, 0, Length);
+            Data = new byte[len];
+            Buffer.BlockCopy(modbusResponse, 2, Data, 0, len);
         }
     }
 }

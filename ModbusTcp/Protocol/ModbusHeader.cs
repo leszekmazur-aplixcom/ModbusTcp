@@ -15,7 +15,10 @@ namespace ModbusTcp.Protocol
         [MarshalAs(UnmanagedType.U2)]
         public short Length = FixedLength;
 
-        public const int FixedLength = 6;
+        [MarshalAs(UnmanagedType.U1)]
+        public byte UnitIdentifier;
+
+        public const int FixedLength = 7;
 
         public ModbusHeader Clone()
         {

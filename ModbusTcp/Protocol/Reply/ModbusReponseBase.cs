@@ -10,27 +10,21 @@ namespace ModbusTcp.Protocol.Reply
 
         public byte FunctionCode;
 
-        public abstract void FromNetworkBuffer(byte[] buffer);
+        public abstract void FromNetworkBuffer(ModbusHeader header, byte[] modbusResponse);
 
-        protected int StandardResponseFromNetworkBuffer(byte[] buffer)
+        protected void StandardResponseFromNetworkBuffer(ModbusHeader header, byte[] modbusResponse)
         {
-            var idx = 0;
-
-            Header = ModbusHeader.FromNetworkBuffer(buffer);
-            idx += ModbusHeader.FixedLength;
-
-            UnitIdentifier = buffer[idx++];
-            FunctionCode = buffer[idx++];
+            Header = header;
+            
+            FunctionCode = modbusResponse[0];
 
             if (FunctionCode >= 0x80)
             {
-                var exceptionCode = buffer[idx];
+                var exceptionCode = modbusResponse[1];
                 var orginalFunctionCode = (byte)(FunctionCode - ModbusErrorOffset);
 
                 throw new ModbusReplyException(orginalFunctionCode, exceptionCode);
             }
-
-            return idx;
         }
 
         public override sealed byte[] ToNetworkBuffer()

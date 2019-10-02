@@ -9,10 +9,6 @@ namespace ModbusTcp.Protocol.Request
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public abstract class ModbusRequestBase : ModbusBase
     {
-
-        [MarshalAs(UnmanagedType.U1)]
-        public byte UnitIdentifier;
-
         [MarshalAs(UnmanagedType.U1)]
         public byte FunctionCode;
 

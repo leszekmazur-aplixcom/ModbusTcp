@@ -9,12 +9,12 @@ namespace ModbusTcp.Protocol.Reply
 
         public short WordCount;
 
-        public override void FromNetworkBuffer(byte[] buffer)
+        public override void FromNetworkBuffer(ModbusHeader header, byte[] modbusResponse)
         {
-            var idx = StandardResponseFromNetworkBuffer(buffer);
+            StandardResponseFromNetworkBuffer(header, modbusResponse);
 
-            ReferenceNumber = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(buffer, idx));
-            WordCount = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(buffer, idx + 2));
+            ReferenceNumber = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(modbusResponse, 1));
+            WordCount = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(modbusResponse, 3));
         }
     }
 }
