@@ -582,7 +582,7 @@ namespace ModbusTcp
         /// </summary>
         public void Terminate()
         {
-            tcpClient.Close();
+            tcpClient?.Close();
             tcpClient = null;
         }
 
