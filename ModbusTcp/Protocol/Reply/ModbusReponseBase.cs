@@ -6,7 +6,9 @@ namespace ModbusTcp.Protocol.Reply
     {
         private const byte ModbusErrorOffset = 0x80;
 
+#pragma warning disable 0649
         public byte UnitIdentifier;
+#pragma warning restore 0649
 
         public byte FunctionCode;
 
