@@ -14,6 +14,12 @@ namespace ModbusTcp.Protocol.Reply
             ExceptionCode = exceptionCode;
         }
 
+        public ModbusReplyException(ModbusReplyException innerReplyException, string connectionInfo) : base($"Modbus reply fails for { connectionInfo }: {GetMsg(innerReplyException.ExceptionCode) }", innerReplyException)
+        {
+            OrginalFunctionCode = innerReplyException.OrginalFunctionCode;
+            ExceptionCode = innerReplyException.ExceptionCode;
+        }
+
         private static string GetMsg(byte exceptionCode)
         {
             switch (exceptionCode)

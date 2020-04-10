@@ -627,7 +627,15 @@ namespace ModbusTcp
             var dataBytes = await ReadFromBufferAsync(header.Length - 1); //Ommit Unit Identifier from MBAP Header
             
             var response = Activator.CreateInstance<T>();
-            response.FromNetworkBuffer(header, dataBytes);
+
+            try
+            {
+                response.FromNetworkBuffer(header, dataBytes);
+            }
+            catch (ModbusReplyException mre)
+            {
+                throw new ModbusReplyException(mre, $"{ ipAddress }:{ port }");
+            }
 
             return response;
         }
@@ -640,7 +648,14 @@ namespace ModbusTcp
             var dataBytes = ReadFromBuffer(header.Length - 1); //Ommit Unit Identifier from MBAP Header
             
             var response = Activator.CreateInstance<T>();
-            response.FromNetworkBuffer(header, dataBytes);
+            try
+            {
+                response.FromNetworkBuffer(header, dataBytes);
+            }
+            catch (ModbusReplyException mre)
+            {
+                throw new ModbusReplyException(mre, $"{ ipAddress }:{ port }");
+            }
 
             return response;
         }
